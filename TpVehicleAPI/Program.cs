@@ -1,45 +1,71 @@
+using System.ComponentModel.DataAnnotations;
+using System.Text.Json;
+using Microsoft.AspNetCore.Mvc;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddSingleton<IVehicleDataProvider, HardcodedVehicleDataProvider>();
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() && !app.Environment.IsEnvironment("Testing"))
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
-
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
+app.MapGet("/vehicles/{registrationNumber}", async ([AsParameters] VehicleRequest request, IVehicleDataProvider provider) =>
     {
-        var forecast = Enumerable.Range(1, 5).Select(index =>
-                new WeatherForecast
-                (
-                    DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                    Random.Shared.Next(-20, 55),
-                    summaries[Random.Shared.Next(summaries.Length)]
-                ))
-            .ToArray();
-        return forecast;
+        var validationContext = new ValidationContext(request);
+        // minimal APIs don't run DataAnnotations automatically, so validate manually
+        if (!Validator.TryValidateObject(request, validationContext, new List<ValidationResult>(), true))
+        {
+            return Results.BadRequest();
+        }
+
+        var plate = request.RegistrationNumber;
+        var vehicle = await provider.GetVehicleAsync(plate);
+        return vehicle is not null
+            ? Results.Text(JsonSerializer.Serialize(vehicle), "application/json")
+            : Results.NotFound();
     })
-    .WithName("GetWeatherForecast")
+    .WithName("GetVehicle")
     .WithOpenApi();
 
 app.Run();
 
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
+public interface IVehicleDataProvider
 {
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+    Task<VehicleResponse?> GetVehicleAsync(string registrationNumber);
 }
-public partial class Program { }
+
+public sealed class HardcodedVehicleDataProvider : IVehicleDataProvider
+{
+    private static readonly VehicleResponse[] Vehicles =
+    {
+        new("ABC123", "Volvo", "V70", 2016),
+        new("DEF456", "Saab", "9-3", 2008),
+        new("GHI789", "Tesla", "Model 3", 2023)
+    };
+
+    public Task<VehicleResponse?> GetVehicleAsync(string registrationNumber)
+    {
+        var match = Vehicles.FirstOrDefault(v =>
+            string.Equals(v.RegistrationNumber, registrationNumber, StringComparison.OrdinalIgnoreCase));
+        return Task.FromResult(match);
+    }
+}
+
+public sealed class VehicleRequest
+{
+    [FromRoute]
+    [StringLength(7, MinimumLength = 2)]
+    public required string RegistrationNumber { get; init; }
+}
+
+public sealed record VehicleResponse(string RegistrationNumber, string Manufacturer, string Model, int ModelYear);
+
+public partial class Program;
