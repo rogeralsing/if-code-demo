@@ -1,0 +1,25 @@
+Let´s do the Insurance service. check how the Vehicle service is structured and set up.
+Do the same for this. 
+See the "NET - Assignment Instructions" for further instructions
+
+sub prompt 1:
+
+According to the specs. prices should be per insurance type:
+
+Insurance products and prices:
+
+• Pet insurance: $10
+• Personal health insurance: $20
+• Car insurance: $30
+
+Also, use an Enum for the Insurance type.
+
+Also make a comment on the enum why we are not doing polymorphism, e.g. the current requirement is bounded, not unbounded. and good enough for now
+
+sub prompt 2:
+
+"record InsuranceResponse(string Type,"
+
+I want the enum in the response.
+But make it serialize as string in the json
+

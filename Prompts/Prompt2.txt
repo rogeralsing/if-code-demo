@@ -1,0 +1,6 @@
+Add two XUnit test projects, one for each API project.
+Use Microsoft.AspNetCore.Mvc.Testing for in process testing.
+
+Make sure the projects build properly and that the empty tests pass.
+
+Add Github workflow files for pull requests that run all the tests

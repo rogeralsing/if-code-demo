@@ -1,0 +1,81 @@
+Let´s start with Vehicle service, check the requirements in the pdf file.
+Create the relevant request, response types, use swagger and annotations for data validation of the API.  if possible to use swagger and minimal API, then go for this, and place request response types in the same file.
+base the annotations for registration plate on  https://sv.wikipedia.org/wiki/Registreringsskyltar_i_Sverige
+
+use a simple hardcoded data provider for Vehicle data, give it an interface so we can swap implementations later. 
+
+The customer is likely looking for a less pattern-esque solution, but this is still the most kosher thing to do for testing and future integrations. make sure it´s async based so we don´t have to redo things later on.
+register the interface and the hardcoded data provider in the DI setup.
+
+Add initial tests to interact with the service.
+
+--
+
+Sub Prompt 1:
+
+Just make the RegistrationNumber min 2 chars, max 7 chars. no other rules. anything else should be validated using real business rules later on. remove the vehicleconstants. 
+
+Is the ValidationFilter needed?
+
+Sub Prompt 2:
+
+Why do we have both this "if (plate.Length is < 2 or > 7)" and "   [StringLength(7, MinimumLength = 2)]" ?
+
+Isn´t just the annotations enough?
+
+Sub Prompt 3:
+
+Create a new TestVehicleDataProvider used in the tests, make the tests register that via DI during test setup. 
+this way, we can have unique test data to test against, instead of the hardcoded data in the hardcoded provider
+
+
+Sub Prompt 4:
+
+" dotnet test (SDK 8.0.412 does not support targeting .NET 9.0)"
+
+So fix the version issue....
+
+Sub Prompt 5:
+
+Github build actions are failing with:
+
+Test Run Aborted.
+Testhost process for source(s) '/home/runner/work/if-code-demo/if-code-demo/TpInsuranceAPI.Tests/bin/Debug/net8.0/TpInsuranceAPI.Tests.dll' exited with error: You must install or update .NET to run this application.
+App: /home/runner/work/if-code-demo/if-code-demo/TpInsuranceAPI.Tests/bin/Debug/net8.0/testhost.dll
+Architecture: x64
+Framework: 'Microsoft.AspNetCore.App', version '8.0.0' (x64)
+.NET location: /usr/share/dotnet/
+The following frameworks were found:
+  9.0.8 at [/usr/share/dotnet/shared/Microsoft.AspNetCore.App]
+Learn more:
+https://aka.ms/dotnet/app-launch-failed
+To install missing framework, download:
+https://aka.ms/dotnet-core-applaunch?framework=Microsoft.AspNetCore.App&framework_version=8.0.0&arch=x64&rid=linux-x64&os=ubuntu.24.04
+
+Just make it work properly with .net 9 everywhere, workflows, code etc
+
+
+Sub Prompt 6:
+
+github actions are still failing
+
+
+Run dotnet restore
+The command could not be loaded, possibly because:
+  * You intended to execute a .NET application:
+      The application 'restore' does not exist.
+  * You intended to execute a .NET SDK command:
+      A compatible .NET SDK was not found.
+
+Requested SDK version: 9.0.100
+global.json file: /home/runner/work/if-code-demo/if-code-demo/global.json
+
+Installed SDKs:
+
+Install the [9.0.100] .NET SDK or update [/home/runner/work/if-code-demo/if-code-demo/global.json] to match an installed SDK.
+
+Learn about SDK resolution:
+https://aka.ms/dotnet/sdk-not-found
+9.0.304 [/usr/share/dotnet/sdk]
+Error: Process completed with exit code 145.
+

@@ -1,0 +1,9 @@
+Create an agents.md file in the repo describing the task at hand. read the "NET - Assignment Instructions.pdf" in the root folder.
+
+Some strict rules.
+The code should be pragmatic, easy to read, not bloated with design patterns.
+The overall essence of the code should be more in line with Golang minimalsim rather than traditional .NET enterprise heavy. 
+The code should be optimized for AI agents to understand and modify.
+
+Since we are working with REST. let´s stick to Swagger for API documentation.
+We can use Swashbuckle for this as this is the most mainstream solution.
