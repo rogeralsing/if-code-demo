@@ -1,0 +1,16 @@
+Add more error handling. e.g. clear and easy to understand error messaging using standard http response patterns. 
+e.g.
+this part:
+        var context = new ValidationContext(request);
+        // Minimal APIs do not trigger DataAnnotations automatically
+        if (!Validator.TryValidateObject(request, context, new List<ValidationResult>(), true))
+            return Results.BadRequest();
+
+We should inform the user of what validation failed.
+
+Use Polly for retries on the http client class from insurance to vehicle service.
+
+This needs extra attention, requirements missing:
+"Handling of edge cases (e.g., missing vehicles, no insurances, multiple insurances)."
+
+You can have multiple cars, you can have multiple pets, you probably can´t have multiple personal health insurances.
