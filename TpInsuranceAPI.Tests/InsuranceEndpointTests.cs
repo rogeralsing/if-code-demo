@@ -37,9 +37,7 @@ public class InsuranceEndpointTests : IClassFixture<WebApplicationFactory<Progra
     [Fact]
     public async Task ReturnsInsurancesForKnownPersonalNumber()
     {
-        var json = await _client.GetStringAsync("/insurances/190101011234");
-        Assert.Contains("\"type\":\"Car\"", json); // enum serialized as string
-        var insurances = JsonSerializer.Deserialize<InsuranceResponse[]>(json, Json);
+        var insurances = await _client.GetFromJsonAsync<InsuranceResponse[]>("/insurances/190101011234", Json);
         Assert.NotNull(insurances);
         var car = insurances!.First(i => i.Type == InsuranceType.Car);
         Assert.NotNull(car.Vehicle);
@@ -77,12 +75,11 @@ public class InsuranceEndpointTests : IClassFixture<WebApplicationFactory<Progra
     }
 
     [Fact]
-    public async Task ReturnsInsuranceEvenWhenVehicleMissing()
+    public async Task ReturnsNotFoundWhenVehicleMissing()
     {
-        var json = await _client.GetStringAsync("/insurances/190101011235");
-        var insurances = JsonSerializer.Deserialize<InsuranceResponse[]>(json, Json);
-        Assert.NotNull(insurances);
-        var car = insurances!.Single(i => i.Type == InsuranceType.Car);
-        Assert.Null(car.Vehicle);
+        var response = await _client.GetAsync("/insurances/190101011235");
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        var problem = await response.Content.ReadFromJsonAsync<ProblemDetails>();
+        Assert.Equal("Vehicle MISS123 not found", problem!.Title);
     }
 }

@@ -33,7 +33,7 @@ dotnet test
 ## Error handling
 - Inputs are validated with data annotations; invalid values yield `400 Bad Request`.
 - Unknown identifiers result in `404 Not Found`.
-- Missing vehicle information on a car insurance leaves the `vehicle` field empty.
+- Missing vehicle information for a car insurance results in `404 Not Found`.
 
 ## Extensibility
 - Real data providers or HTTP clients can replace the hardcoded ones without touching
@@ -43,6 +43,7 @@ dotnet test
 ## Security considerations
 - No authentication or authorisation is implemented.
 - HTTPS and proper input sanitisation would be required for production use.
+- Basic rate limiting is enabled to reduce the impact of potential abuse.
 
 ## Reflection
 Keeping the code compact and explicit makes it easy to read and modify. Abstracting
