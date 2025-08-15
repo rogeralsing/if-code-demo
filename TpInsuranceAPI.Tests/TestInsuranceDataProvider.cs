@@ -11,6 +11,15 @@ public sealed class TestInsuranceDataProvider : IInsuranceDataProvider
         [
             new Insurance(InsuranceType.Car, "TST123"),
             new Insurance(InsuranceType.Pet, null)
+        ],
+        ["190101011235"] =
+        [
+            new Insurance(InsuranceType.Car, "MISS123")
+        ],
+        ["199901019999"] =
+        [
+            new Insurance(InsuranceType.PersonalHealth, null),
+            new Insurance(InsuranceType.PersonalHealth, null)
         ]
     };
 
