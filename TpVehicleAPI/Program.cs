@@ -19,12 +19,14 @@ if (app.Environment.IsDevelopment() && !app.Environment.IsEnvironment("Testing")
 
 app.MapGet("/vehicles/{registrationNumber}", async ([AsParameters] VehicleRequest request, IVehicleDataProvider provider) =>
     {
-        var plate = request.RegistrationNumber;
-        if (plate.Length is < 2 or > 7)
+        var validationContext = new ValidationContext(request);
+        // minimal APIs don't run DataAnnotations automatically, so validate manually
+        if (!Validator.TryValidateObject(request, validationContext, new List<ValidationResult>(), true))
         {
             return Results.BadRequest();
         }
 
+        var plate = request.RegistrationNumber;
         var vehicle = await provider.GetVehicleAsync(plate);
         return vehicle is not null
             ? Results.Text(JsonSerializer.Serialize(vehicle), "application/json")
