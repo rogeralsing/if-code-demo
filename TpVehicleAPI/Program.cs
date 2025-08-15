@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
-using System.Text.Json;
+using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +10,17 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddSingleton<IVehicleDataProvider, HardcodedVehicleDataProvider>();
 
+// Basic fixed-window rate limiter: 10 requests per second
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddFixedWindowLimiter("fixed", o =>
+    {
+        o.Window = TimeSpan.FromSeconds(1);
+        o.PermitLimit = 10;
+        o.QueueLimit = 0;
+    });
+});
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment() && !app.Environment.IsEnvironment("Testing"))
@@ -16,6 +28,8 @@ if (app.Environment.IsDevelopment() && !app.Environment.IsEnvironment("Testing")
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseRateLimiter();
 
 app.MapGet("/vehicles/{registrationNumber}", async ([AsParameters] VehicleRequest request, IVehicleDataProvider provider) =>
     {
@@ -34,9 +48,10 @@ app.MapGet("/vehicles/{registrationNumber}", async ([AsParameters] VehicleReques
         var plate = request.RegistrationNumber;
         var vehicle = await provider.GetVehicleAsync(plate);
         return vehicle is not null
-            ? Results.Text(JsonSerializer.Serialize(vehicle), "application/json")
+            ? Results.Json(vehicle)
             : Results.Problem(statusCode: 404, title: $"Vehicle {plate} not found");
     })
+    .RequireRateLimiting("fixed")
     .WithName("GetVehicle")
     .WithOpenApi();
 

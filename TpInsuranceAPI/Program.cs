@@ -2,8 +2,10 @@ using System.ComponentModel.DataAnnotations;
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json.Serialization;
+using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Http.Json;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Polly;
 using Polly.Extensions.Http;
 
@@ -25,6 +27,17 @@ builder.Services.AddHttpClient<IVehicleClient, VehicleApiClient>(client =>
 builder.Services.ConfigureHttpJsonOptions(opts =>
     opts.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
+// Basic fixed-window rate limiter: 10 requests per second
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddFixedWindowLimiter("fixed", o =>
+    {
+        o.Window = TimeSpan.FromSeconds(1);
+        o.PermitLimit = 10;
+        o.QueueLimit = 0;
+    });
+});
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment() && !app.Environment.IsEnvironment("Testing"))
@@ -32,6 +45,8 @@ if (app.Environment.IsDevelopment() && !app.Environment.IsEnvironment("Testing")
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseRateLimiter();
 
 app.MapGet("/insurances/{personalNumber}", async ([AsParameters] PersonRequest request, IInsuranceDataProvider provider, IVehicleClient vehicleClient) =>
     {
@@ -61,12 +76,16 @@ app.MapGet("/insurances/{personalNumber}", async ([AsParameters] PersonRequest r
             if (!string.IsNullOrEmpty(insurance.RegistrationNumber))
             {
                 vehicle = await vehicleClient.GetVehicleAsync(insurance.RegistrationNumber);
+                // stop if a referenced vehicle is missing
+                if (vehicle is null)
+                    return Results.Problem(statusCode: 404, title: $"Vehicle {insurance.RegistrationNumber} not found");
             }
             responses.Add(new InsuranceResponse(insurance.Type, insurance.MonthlyCost, vehicle));
         }
 
         return Results.Ok(responses);
     })
+    .RequireRateLimiting("fixed")
     .WithName("GetInsurances")
     .WithOpenApi();
 
