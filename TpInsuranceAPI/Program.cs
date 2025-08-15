@@ -4,6 +4,8 @@ using System.Net.Http.Json;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Http.Json;
 using Microsoft.AspNetCore.Mvc;
+using Polly;
+using Polly.Extensions.Http;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,7 +18,8 @@ builder.Services.AddHttpClient<IVehicleClient, VehicleApiClient>(client =>
 {
     var baseUrl = builder.Configuration.GetValue<string>("VehicleApiBaseUrl") ?? "http://localhost:5005";
     client.BaseAddress = new Uri(baseUrl);
-});
+})
+    .AddTransientHttpErrorPolicy(p => p.WaitAndRetryAsync(3, i => TimeSpan.FromMilliseconds(200 * i))); // basic retry logic
 
 // Serialize enums as strings in JSON responses
 builder.Services.ConfigureHttpJsonOptions(opts =>
@@ -33,13 +36,23 @@ if (app.Environment.IsDevelopment() && !app.Environment.IsEnvironment("Testing")
 app.MapGet("/insurances/{personalNumber}", async ([AsParameters] PersonRequest request, IInsuranceDataProvider provider, IVehicleClient vehicleClient) =>
     {
         var context = new ValidationContext(request);
+        var results = new List<ValidationResult>();
         // Minimal APIs do not trigger DataAnnotations automatically
-        if (!Validator.TryValidateObject(request, context, new List<ValidationResult>(), true))
-            return Results.BadRequest();
+        if (!Validator.TryValidateObject(request, context, results, true))
+        {
+            var errors = results
+                .SelectMany(r => r.MemberNames.Select(m => (m, error: r.ErrorMessage ?? "Invalid value")))
+                .GroupBy(e => e.m)
+                .ToDictionary(g => g.Key, g => g.Select(e => e.error).ToArray());
+            return Results.ValidationProblem(errors);
+        }
 
         var insurances = (await provider.GetInsurancesAsync(request.PersonalNumber)).ToArray();
         if (insurances.Length == 0)
-            return Results.NotFound();
+            return Results.Problem(statusCode: 404, title: "No insurances found");
+
+        if (insurances.Count(i => i.Type == InsuranceType.PersonalHealth) > 1)
+            return Results.Problem(statusCode: 409, title: "Multiple personal health insurances found"); // a person should only have one
 
         var responses = new List<InsuranceResponse>();
         foreach (var insurance in insurances)

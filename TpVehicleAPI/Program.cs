@@ -20,17 +20,22 @@ if (app.Environment.IsDevelopment() && !app.Environment.IsEnvironment("Testing")
 app.MapGet("/vehicles/{registrationNumber}", async ([AsParameters] VehicleRequest request, IVehicleDataProvider provider) =>
     {
         var validationContext = new ValidationContext(request);
+        var validationResults = new List<ValidationResult>();
         // minimal APIs don't run DataAnnotations automatically, so validate manually
-        if (!Validator.TryValidateObject(request, validationContext, new List<ValidationResult>(), true))
+        if (!Validator.TryValidateObject(request, validationContext, validationResults, true))
         {
-            return Results.BadRequest();
+            var errors = validationResults
+                .SelectMany(r => r.MemberNames.Select(m => (m, error: r.ErrorMessage ?? "Invalid value")))
+                .GroupBy(e => e.m)
+                .ToDictionary(g => g.Key, g => g.Select(e => e.error).ToArray());
+            return Results.ValidationProblem(errors);
         }
 
         var plate = request.RegistrationNumber;
         var vehicle = await provider.GetVehicleAsync(plate);
         return vehicle is not null
             ? Results.Text(JsonSerializer.Serialize(vehicle), "application/json")
-            : Results.NotFound();
+            : Results.Problem(statusCode: 404, title: $"Vehicle {plate} not found");
     })
     .WithName("GetVehicle")
     .WithOpenApi();

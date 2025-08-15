@@ -1,7 +1,9 @@
 using System.Net;
+using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -52,6 +54,8 @@ public class InsuranceEndpointTests : IClassFixture<WebApplicationFactory<Progra
     {
         var response = await _client.GetAsync("/insurances/200001010000");
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        var problem = await response.Content.ReadFromJsonAsync<ProblemDetails>();
+        Assert.Equal("No insurances found", problem!.Title);
     }
 
     [Fact]
@@ -59,5 +63,26 @@ public class InsuranceEndpointTests : IClassFixture<WebApplicationFactory<Progra
     {
         var response = await _client.GetAsync("/insurances/123");
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        var problem = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
+        Assert.Contains("PersonalNumber", problem!.Errors.Keys);
+    }
+
+    [Fact]
+    public async Task ReturnsConflictWhenMultiplePersonalHealthInsurances()
+    {
+        var response = await _client.GetAsync("/insurances/199901019999");
+        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+        var problem = await response.Content.ReadFromJsonAsync<ProblemDetails>();
+        Assert.Equal("Multiple personal health insurances found", problem!.Title);
+    }
+
+    [Fact]
+    public async Task ReturnsInsuranceEvenWhenVehicleMissing()
+    {
+        var json = await _client.GetStringAsync("/insurances/190101011235");
+        var insurances = JsonSerializer.Deserialize<InsuranceResponse[]>(json, Json);
+        Assert.NotNull(insurances);
+        var car = insurances!.Single(i => i.Type == InsuranceType.Car);
+        Assert.Null(car.Vehicle);
     }
 }

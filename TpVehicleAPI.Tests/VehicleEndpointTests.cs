@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -37,6 +38,8 @@ public class VehicleEndpointTests : IClassFixture<WebApplicationFactory<Program>
     {
         var response = await _client.GetAsync("/vehicles/NOPE999");
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        var problem = await response.Content.ReadFromJsonAsync<ProblemDetails>();
+        Assert.Equal("Vehicle NOPE999 not found", problem!.Title);
     }
 
     [Fact]
@@ -44,5 +47,7 @@ public class VehicleEndpointTests : IClassFixture<WebApplicationFactory<Program>
     {
         var response = await _client.GetAsync("/vehicles/A");
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        var problem = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
+        Assert.Contains("RegistrationNumber", problem!.Errors.Keys);
     }
 }
