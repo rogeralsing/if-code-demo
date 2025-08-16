@@ -28,7 +28,7 @@ public class VehicleEndpointTests : IClassFixture<WebApplicationFactory<Program>
     [Fact]
     public async Task ReturnsVehicleForKnownRegistration()
     {
-        var vehicle = await _client.GetFromJsonAsync<VehicleResponse>("/vehicles/TST123");
+        var vehicle = await _client.GetFromJsonAsync<VehicleResponse>("/api/v1/vehicles/TST123");
         Assert.NotNull(vehicle);
         Assert.Equal("TST123", vehicle!.RegistrationNumber);
     }
@@ -36,7 +36,7 @@ public class VehicleEndpointTests : IClassFixture<WebApplicationFactory<Program>
     [Fact]
     public async Task ReturnsNotFoundForUnknownRegistration()
     {
-        var response = await _client.GetAsync("/vehicles/NOPE999");
+        var response = await _client.GetAsync("/api/v1/vehicles/NOPE999");
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         var problem = await response.Content.ReadFromJsonAsync<ProblemDetails>();
         Assert.Equal("Vehicle NOPE999 not found", problem!.Title);
@@ -45,7 +45,7 @@ public class VehicleEndpointTests : IClassFixture<WebApplicationFactory<Program>
     [Fact]
     public async Task ReturnsBadRequestForInvalidRegistration()
     {
-        var response = await _client.GetAsync("/vehicles/A");
+        var response = await _client.GetAsync("/api/v1/vehicles/A");
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         var problem = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
         Assert.Contains("RegistrationNumber", problem!.Errors.Keys);
