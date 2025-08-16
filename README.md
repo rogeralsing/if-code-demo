@@ -7,6 +7,42 @@ This entire codebase was generated using AI tooling — **0 lines of manual code
 Could this have been done faster by combining AI and manual coding? **Absolutely.**  
 But my goal was to showcase that the right AI tooling, combined with tests and requirements, can produce a complete, runnable, and testable codebase with minimal manual effort.
 
+> Any similar project or experience you’ve had in the past.
+
+**Real-World Examples**
+
+For real-world examples where I apply this approach, see:
+
+- [protoactor-go PRs (Codex)](https://github.com/asynkron/protoactor-go/pulls?q=label%3Acodex)  
+- [protoactor-dotnet PRs (Codex)](https://github.com/asynkron/protoactor-dotnet/pulls?q=label%3Acodex)  
+- [protoactor-website PRs (Codex)](https://github.com/asynkron/protoactor-website/pulls?q=label%3Acodex)  
+
+Companies like **ByteDance** (creators of TikTok) use ProtoActor Go for internal services, and organizations like **Beamable, ChargeAmps, and ABAX** use ProtoActor .NET for their backend services.
+
+Another real world usecase was CAB - Car repair management system for the insurance industry.
+
+Their internal teams stated that their old legacy systems could not be ported to .NET Core, due to outdated dependencies and libraries and complex codebase.
+
+I created various CLI tools using AI generated code to help them migrate their codebase to .NET Core.
+
+e.g. 
+* Automatically migrate from NHibernate to Entity Framework Core
+* Automatically migrate from Typed DataSets to Entity Framework Core
+* Automatically migrate from LinqToSql to Entity Framework Core
+* Automatically apply Dependency Injection via ctors.
+* Automatically replace "new" or static dependencies with Dependency Injection
+
+> What was challenging or interesting in this assignment.
+
+I simply enjoy this kind of work. after writing code manually for 30+ years, I find it fascinating to see how AI can generate code that is not only functional but also maintainable and testable.
+
+> What you would improve or extend if you had more time.
+
+Plenty. it´s a demo. Not having business rules in endpoints, better error propagation. e.g. result types. 
+In a real system one would also have real Units to test. not just endpoints interacting with some downstream data service.
+
+Swedish SSN and reg plates are a solved problem, there are libraries and lookup tables for that. this was omitted on purpose to keep the codebase minimalistic.
+
 ---
 
 ### Prompt Breakdown
@@ -36,17 +72,6 @@ I’m a believer in **disposable code** — true microservices you can throw awa
 The code should still be easy to read and understand, but less ceremony (DTOs, BE, DE models everywhere) often means more flexibility and faster iteration.  
 
 Basically: **less ceremony, just working code.**
-
----
-
-### Real-World Examples
-For real-world examples of this approach, see:
-
-- [protoactor-go PRs (Codex)](https://github.com/asynkron/protoactor-go/pulls?q=label%3Acodex)  
-- [protoactor-dotnet PRs (Codex)](https://github.com/asynkron/protoactor-dotnet/pulls?q=label%3Acodex)  
-- [protoactor-website PRs (Codex)](https://github.com/asynkron/protoactor-website/pulls?q=label%3Acodex)  
-
-Companies like **ByteDance** (creators of TikTok) use ProtoActor Go for internal services, and organizations like **Beamable, ChargeAmps, and ABAX** use ProtoActor .NET for their backend services.
 
 ---
 
