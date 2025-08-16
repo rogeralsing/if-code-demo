@@ -48,8 +48,8 @@ Swedish SSN and reg plates are a solved problem, there are libraries and lookup 
 ### Prompt Breakdown
 All prompts are available in the [Prompts](/Prompts/) folder:
 
-- **Prompts 1–3**: created services and tests  
-- **Prompts 4–6**: mostly code review feedback  
+- **Prompts 1–4**: created services and tests  
+- **Prompts 5–6**: mostly code review feedback  
 - **Prompts 7–9**: cleanup — removing unused files, usings, etc.  
 
 ![prompts](/Prompts/prompts.png)
