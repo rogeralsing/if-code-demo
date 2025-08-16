@@ -1,0 +1,34 @@
+Drop testing for JSON serialization like : "type":"Car". this mix serialization behavior with expected service behavior.
+Just ignore that part completely. it´s a code demo only.
+
+Replace nonsense like:
+return vehicle is not null
+    ? Results.Text(JsonSerializer.Serialize(vehicle), "application/json")
+    : Results.Problem(statusCode: 404, title: $"Vehicle {plate} not found");
+
+with 
+return vehicle is not null
+    ? Results.Json(vehicle)
+    : Results.Problem(statusCode: 404, title: $"Vehicle {plate} not found");
+
+
+Use  "rollForward": "latestMajor" for global.json so we don´t need exact dotnet versions installed.
+
+apply rate-limiting to the services, better safe than sorry if ddosed.
+
+sub prompt 1:
+
+Fix deserialization in tests. avoid GetStringAsync if not needed.
+use e.g. var insurances = await _client.GetFromJsonAsync<InsuranceResponse[]>(....
+
+sub prompt 2:
+
+pretty please <3 stop changing dotnet version.. use 9 preview and allow user to roll forward.
+
+sub prompt 3:
+
+add test for insurance service where a car insurance exist, but the car is missing in the vehicle service.
+
+Make sure this gives a proper error message back to the user
+
+

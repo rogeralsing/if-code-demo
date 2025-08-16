@@ -1,0 +1,1 @@
+Add the .idea files and folders into gitignore and then delete the files from the git repo

@@ -1,0 +1,20 @@
+VehicleApiClient does not gracefully handle other exceptions than 404.
+explicitly signal 503 Service Unavailable in insurance service if vehicle service returns any form of http exception except 404. 
+
+Also, replace the bloated validation code in both endpoints with https://www.nuget.org/packages/MinApiLib.Validation
+
+Remove dead usings.
+
+delete .http files
+
+use an /api/v1/ scheme for urls. 
+
+move endpoints and their contract types into separate files.
+attach the endpoint using an extension method from program.cs
+
+move data and clients into separate files. implementations and interfaces can go in the same files.
+
+sub prompt 1:
+
+Stop changing .net version, we should be on .net 9... add that as a hard requirement in agents.md and fix the dependencies.
+

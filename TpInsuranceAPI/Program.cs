@@ -1,10 +1,6 @@
-using System.Net;
 using System.Text.Json.Serialization;
-using System.Threading.RateLimiting;
-using Microsoft.AspNetCore.Http.Json;
 using Microsoft.AspNetCore.RateLimiting;
 using Polly;
-using Polly.Extensions.Http;
 using TpInsuranceAPI;
 
 var builder = WebApplication.CreateBuilder(args);
