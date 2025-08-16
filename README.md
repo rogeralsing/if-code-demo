@@ -83,6 +83,7 @@ dotnet test
 ## Error handling
 - Inputs are validated with data annotations; invalid values yield `400 Bad Request`. this is not a solid full validation, but a minimal check, that allows developers to more easily understand API requirements.
 - Unknown identifiers result in `404 Not Found`.
+- Downstream service errors yield `503 Service Unavailable`.
 - Api to Api calls are handled with `HttpClient` wrapped in Polly
   for basic retry logic.
 
@@ -90,6 +91,7 @@ dotnet test
 ## Extensibility
 - Using inprocess tests for entire APIs allow us to easily replace dependencies, e.g. with mocks or hardcoded data.
 - Additional endpoints can follow the same minimal style.
+- The specification lacks real requirements in terms of business rules, e.g. what are viable insurance combinations. in a real world app, insurance combinations would likely not be verified in the endpoint itself.
 
 ## Security considerations
 - No authentication or authorisation is implemented.
@@ -102,9 +104,8 @@ dotnet test
 
 Swedish SSN parsing and validation could be an entire code test on its own.
 
-- e.g. with or without dashes, length, checksum, etc.
-- Samordningsnummer (coordination number) vs personnummer (personal number) handling.
-- Validating Personnummer vs Organisationsnummer
+- e.g. with or without dashes, with or without century, length, checksum, etc.
+- Samordningsnummer vs personnummer vs organisationnummer.
 
 ### Vehicle registration number parsing and validation
 Vehicle registration number parsing and validation could also be an entire code test on its own.
@@ -116,7 +117,7 @@ Vehicle registration number parsing and validation could also be an entire code 
 Error handling could be done in many different ways.
 Result Types, Railway oriented programming, Error codes vs exceptions.
 
-For a minimal code demo, such design could easily outshadow the main purpose of the code test.
+For a minimal code demo, such design could easily outshadow the main purpose of the code test. throw and return http information is sufficient for this demo.
 
 ### Performance and concurrency
 
@@ -132,3 +133,6 @@ If Vehicle API is down, then so is Insurance API.
 Serialization formats and wire protocols,
 JSON over HTTP is a common choice, but not the only one.
 gRPC + HTTP proxy is another variant, use gRPC for internal services and HTTP for external, with no extra code needed.
+
+TLDR; it might not be super pretty, but it does show how entire systems,  could be built with less effort than traditional methods. without any AI hallucinations and frequent rollbacks, which tools like Cursor AI tend to produce.
+
