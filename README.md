@@ -10,7 +10,7 @@ But my goal was to showcase that the right AI tooling, combined with tests and r
 ---
 
 ### Prompt breakdown
-All prompts are available in the `Prompts` folder:
+All prompts are available in the [Prompts](/Prompts/) folder:
 
 - **Prompts 1–3**: created services and tests  
 - **Prompts 4–6**: mostly code review feedback  
