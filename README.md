@@ -1,4 +1,4 @@
-# Reflections from the author
+# Reflections from the Author
 
 **Tools used:** ChatGPT "Codex"
 
@@ -9,7 +9,7 @@ But my goal was to showcase that the right AI tooling, combined with tests and r
 
 ---
 
-### Prompt breakdown
+### Prompt Breakdown
 All prompts are available in the [Prompts](/Prompts/) folder:
 
 - **Prompts 1–3**: created services and tests  
@@ -22,7 +22,7 @@ With clearer requirements upfront (e.g. validation, error handling, retry polici
 
 ---
 
-### About the codebase
+### About the Codebase
 The project started as a .NET solution with two empty ASP.NET Core Web API projects.  
 Everything beyond that is **AI-generated code**.
 
@@ -39,7 +39,7 @@ Basically: **less ceremony, just working code.**
 
 ---
 
-### Real-world examples
+### Real-World Examples
 For real-world examples of this approach, see:
 
 - [protoactor-go PRs (Codex)](https://github.com/asynkron/protoactor-go/pulls?q=label%3Acodex)  
@@ -48,7 +48,7 @@ For real-world examples of this approach, see:
 
 Companies like **ByteDance** (creators of TikTok) use ProtoActor Go for internal services, and organizations like **Beamable, ChargeAmps, and ABAX** use ProtoActor .NET for their backend services.
 
-
+---
 
 # ThreadPilot Integration Demo
 
@@ -58,7 +58,7 @@ This repo hosts two minimal REST APIs that expose data from a fictional core sys
 `GET /vehicles/{registrationNumber}` returns basic vehicle information.
 
 ## Insurance API
-`GET /insurances/{personalNumber}` returns insurances for a person. 
+`GET /insurances/{personalNumber}` returns insurances for a person.  
 Any car insurance includes vehicle details fetched by calling the Vehicle API. 
 
 ## Running
@@ -78,61 +78,64 @@ dotnet test
 ## Architecture
 - Both services use minimal APIs in a single `Program.cs` file.
 - Data comes from interfaces (`IVehicleDataProvider` and `IInsuranceDataProvider`) with hardcoded implementations for simplicity.
-- Insurance service calls the vehicle service through an `IVehicleClient` abstraction.
+- The insurance service calls the vehicle service through an `IVehicleClient` abstraction.
 
-## Error handling
-- Inputs are validated with data annotations; invalid values yield `400 Bad Request`. this is not a solid full validation, but a minimal check, that allows developers to more easily understand API requirements.
+## Error Handling
+- Inputs are validated with data annotations; invalid values yield `400 Bad Request`. This is not a solid full validation, but a minimal check that allows developers to more easily understand API requirements.
 - Unknown identifiers result in `404 Not Found`.
 - Downstream service errors yield `503 Service Unavailable`.
-- Api to Api calls are handled with `HttpClient` wrapped in Polly
-  for basic retry logic.
-
+- API-to-API calls are handled with `HttpClient`, wrapped in Polly for basic retry logic.
 
 ## Extensibility
-- Using inprocess tests for entire APIs allow us to easily replace dependencies, e.g. with mocks or hardcoded data.
+- Using in-process tests for entire APIs allows us to easily replace dependencies, e.g. with mocks or hardcoded data.
 - Additional endpoints can follow the same minimal style.
-- The specification lacks real requirements in terms of business rules, e.g. what are viable insurance combinations. in a real world app, insurance combinations would likely not be verified in the endpoint itself.
+- The specification lacks real requirements in terms of business rules, e.g. what are viable insurance combinations. In a real-world app, insurance combinations would likely not be verified in the endpoint itself.
 
-## Security considerations
-- No authentication or authorisation is implemented.
-- HTTPS and proper input sanitisation would be required for production use.
+## Security Considerations
+- No authentication or authorization is implemented.
+- HTTPS and proper input sanitization would be required for production use.
 - Basic rate limiting is enabled to reduce the impact of potential abuse.
 
-## What is not included
+## Schema Evolution
+There are many ways to handle schema evolution. I went with the simplest approach of just versioning endpoints.  
+This is by far the easiest for any AI tooling to understand and implement.  
+Just slap more endpoints on the existing API, and inform end consumers when older endpoints will become deprecated.  
+This also works very well with Swagger. There is no dynamic aspect to the data itself.
 
-### Swedish SSN parsing and validation
+---
 
+## What Is Not Included
+
+### Swedish SSN Parsing and Validation
 Swedish SSN parsing and validation could be an entire code test on its own.
 
-- e.g. with or without dashes, with or without century, length, checksum, etc.
-- Samordningsnummer vs personnummer vs organisationnummer.
+- With or without dashes, with or without century, length, checksum, etc.
+- Samordningsnummer vs. personnummer vs. organisationsnummer.
 
-### Vehicle registration number parsing and validation
+### Vehicle Registration Number Parsing and Validation
 Vehicle registration number parsing and validation could also be an entire code test on its own.
 - Rules depend on the year it was issued.
-- There are lists of forbidden character combinations, AFAIK also depending on the year.
+- There are lists of forbidden character combinations, also depending on the year.
 
-### Proper unified error handling
+### Proper Unified Error Handling
+Error handling could be done in many different ways:  
+Result types, railway-oriented programming, error codes vs. exceptions.
 
-Error handling could be done in many different ways.
-Result Types, Railway oriented programming, Error codes vs exceptions.
+For a minimal code demo, such design could easily overshadow the main purpose of the code test. Throwing and returning HTTP information is sufficient for this demo.
 
-For a minimal code demo, such design could easily outshadow the main purpose of the code test. throw and return http information is sufficient for this demo.
-
-### Performance and concurrency
-
-If the actual system were to interface with e.g. older mainframe systems.
-Interactions would likely have to be bounded in concurrency limitations.
-e.g. only max 10 concurrent calls to the mainframe at a time.
-Which can be easily enforced from within a single process using semaphores, less so if running multiple processes.
+### Performance and Concurrency
+If the actual system were to interface with, e.g., older mainframe systems, interactions would likely have to be bounded by concurrency limitations.  
+For example, only a maximum of 10 concurrent calls to the mainframe at a time.  
+This can be easily enforced from within a single process using semaphores, less so if running multiple processes.  
 You likely end up with a queue and bounded worker pool to guarantee this limitation at scale.
 
-REST to REST tends to be temporally coupled, this may or may not be a problem in this case.
-If Vehicle API is down, then so is Insurance API.
+REST-to-REST tends to be temporally coupled; this may or may not be a problem in this case.  
+If the Vehicle API is down, then so is the Insurance API.
 
-Serialization formats and wire protocols,
-JSON over HTTP is a common choice, but not the only one.
-gRPC + HTTP proxy is another variant, use gRPC for internal services and HTTP for external, with no extra code needed.
+Serialization formats and wire protocols:  
+JSON over HTTP is a common choice, but not the only one.  
+gRPC + HTTP proxy is another variant: use gRPC for internal services and HTTP for external, with no extra code needed.
 
-TLDR; it might not be super pretty, but it does show how entire systems,  could be built with less effort than traditional methods. without any AI hallucinations and frequent rollbacks, which tools like Cursor AI tend to produce.
+---
 
+**TL;DR**: It might not be super pretty, but it does show how entire systems could be built with less effort than traditional methods — without any AI hallucinations and frequent rollbacks, which tools like Cursor AI tend to produce.
