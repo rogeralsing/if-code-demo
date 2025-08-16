@@ -1,26 +1,51 @@
-# Reflections from author
+# Reflections from the author
 
-Tools used: ChatGPT "Codex"
+**Tools used:** ChatGPT "Codex"
 
-This complete codebase was generated using AI tooling.
-0 lines of manual code, and 6 prompts in total.
-All prompts are available in the `Prompts` folder.
-Prompt 1-3 Creates the services and the tests.
-Prompt 4-6 is mostly clean up and cosmetics.
+This entire codebase was generated using AI tooling — **0 lines of manual code**, and **9 prompts** in total.
 
-The project was set up with a .NET solution and two empty Asp.NET Core Web API projects.
+Could this have been done faster by combining AI and manual coding? **Absolutely.**  
+But my goal was to showcase that the right AI tooling, combined with tests and requirements, can produce a complete, runnable, and testable codebase with minimal manual effort.
 
-Everything beyond that is generated code.
+---
 
-Since this specific task is about showcasing how one can work effectively using AI tooling, I went for a minimalistic approach.
-AI tooling tends to perform better with code within a file, rather than scattered across multiple files.
+### Prompt breakdown
+All prompts are available in the `Prompts` folder:
 
-I´m personally a believer of "disposable code", --true microservices--, code that you can throw away and replace when needed.
+- **Prompts 1–3**: created services and tests  
+- **Prompts 4–6**: mostly code review feedback  
+- **Prompts 7–9**: cleanup — removing unused files, usings, etc.  
 
-The code should still be easy to read and understand, but this approach gives more flexibility to what you allow where.
-You might not need DTO, Business Entity, and Data Entity models for every single thing you interact with.
+With clearer requirements upfront (e.g. validation, error handling, retry policies), this could likely have been reduced to half the number of prompts. Some sub-prompts were just me fighting Codex changing the .NET version.
 
-Basically, less cermony, just code that works.
+---
+
+### About the codebase
+The project started as a .NET solution with two empty ASP.NET Core Web API projects.  
+Everything beyond that is **AI-generated code**.
+
+Since this task was about demonstrating effective AI-assisted workflows, I went for a **minimalistic structure**. AI tooling generally performs better with code consolidated in fewer files. Tools like CodePilot, Cursor AI, and Windsurf still struggle with fragmented projects, whereas Codex does much better (though slower, since it runs tests, searches, and iterates extensively).
+
+---
+
+### Philosophy
+I’m a believer in **disposable code** — true microservices you can throw away and replace when needed.  
+
+The code should still be easy to read and understand, but less ceremony (DTOs, BE, DE models everywhere) often means more flexibility and faster iteration.  
+
+Basically: **less ceremony, just working code.**
+
+---
+
+### Real-world examples
+For real-world examples of this approach, see:
+
+- [protoactor-go PRs (Codex)](https://github.com/asynkron/protoactor-go/pulls?q=label%3Acodex)  
+- [protoactor-dotnet PRs (Codex)](https://github.com/asynkron/protoactor-dotnet/pulls?q=label%3Acodex)  
+- [protoactor-website PRs (Codex)](https://github.com/asynkron/protoactor-website/pulls?q=label%3Acodex)  
+
+Companies like **ByteDance** (creators of TikTok) use ProtoActor Go for internal services, and organizations like **Beamable, ChargeAmps, and ABAX** use ProtoActor .NET for their backend services.
+
 
 
 # ThreadPilot Integration Demo
