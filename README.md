@@ -16,6 +16,8 @@ All prompts are available in the [Prompts](/Prompts/) folder:
 - **Prompts 4–6**: mostly code review feedback  
 - **Prompts 7–9**: cleanup — removing unused files, usings, etc.  
 
+![prompts](/Prompts/prompts.png)
+
 With clearer requirements upfront (e.g. validation, error handling, retry policies), this could likely have been reduced to half the number of prompts. Some sub-prompts were just me fighting Codex changing the .NET version.
 
 ---
