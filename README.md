@@ -80,10 +80,10 @@ Basically: **less ceremony, just working code.**
 This repo hosts two minimal REST APIs that expose data from a fictional core system.
 
 ## Vehicle API
-`GET /vehicles/{registrationNumber}` returns basic vehicle information.
+`GET /api/v1/vehicles/{registrationNumber}` returns basic vehicle information.
 
 ## Insurance API
-`GET /insurances/{personalNumber}` returns insurances for a person.  
+`GET /api/v1/insurances/{personalNumber}` returns insurances for a person.  
 Any car insurance includes vehicle details fetched by calling the Vehicle API. 
 
 ## Running
